@@ -9,27 +9,27 @@ vim.keymap.set("n", "<leader>cc", "<cmd>CodeCompanionChat Toggle<cr>")
 vim.keymap.set("v", "<leader>cc", "<cmd>CodeCompanion<cr>")
 vim.keymap.set("x", "<leader>cc", "<cmd>CodeCompanionActions<cr>")
 
-local map = vim.keymap.set
-
--- Normal mode: deletes/changes don't overwrite the yank register
-map("n", "d", '"_d', { desc = "Delete (no yank)" })
-map("n", "D", '"_D', { desc = "Delete to EOL (no yank)" })
-map("n", "x", '"_x', { desc = "Delete char (no yank)" })
-map("n", "X", '"_X', { desc = "Delete char back (no yank)" })
-map("n", "c", '"_c', { desc = "Change (no yank)" })
-map("n", "C", '"_C', { desc = "Change to EOL (no yank)" })
-
--- Visual mode: d and c discard, but x is left alone, so it still cuts
-map("x", "d", '"_d', { desc = "Delete selection (no yank)" })
-map("x", "c", '"_c', { desc = "Change selection (no yank)" })
-
--- Visual paste doesn't replace your register with the overwritten text
-map("x", "p", "P", { desc = "Paste without overwriting register" })
-
--- Normal-mode cut when you want it, used like an operator: <leader>m + motion
-map("n", "<leader>m", "d", { desc = "Cut (delete + yank)" })
-map("n", "<leader>M", "dd", { desc = "Cut line" })
-
 vim.keymap.set("n", "<leader>ct", function()
   vim.cmd("0r " .. vim.fn.expand("~/.config/nvim/templates/cpp.cpp"))
 end, { desc = "Insert C++ template" })
+
+
+-- register stuff
+local map = vim.keymap.set
+
+-- Normal mode: deleting/changing never touches the register
+for _, key in ipairs({ "d", "D", "x", "X", "c", "C" }) do
+  map("n", key, '"_' .. key, { desc = "No-yank " .. key })
+end
+
+-- Visual mode: d/D/c/C discard, x still cuts
+for _, key in ipairs({ "d", "D", "c", "C" }) do
+  map("x", key, '"_' .. key, { desc = "No-yank " .. key })
+end
+
+-- Pasting over a selection keeps your yank
+map("x", "p", "P", { desc = "Paste without overwriting register" })
+
+-- Real cut in normal mode: <leader>m{motion}, <leader>M for the line
+map("n", "<leader>m", "d", { desc = "Cut" })
+map("n", "<leader>M", "dd", { desc = "Cut line" })
